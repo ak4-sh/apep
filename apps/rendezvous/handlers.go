@@ -7,13 +7,13 @@ import (
 	"net/http"
 )
 
-func healthHandler(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) healthHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(HealthResponse{"ok"})
 }
 
-func createSessionHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) createSessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -56,7 +56,8 @@ func createSessionHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
+	h.store.Put(session)
 }
 
-func JoinSessionHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) joinSessionHandler(w http.ResponseWriter, r *http.Request) {
 }
