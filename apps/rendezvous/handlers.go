@@ -23,6 +23,12 @@ type CreateSessionResponse struct {
 	Status    string `json:"status"`
 }
 
+type JoinSessionRequest struct {
+	JoinCode string `json:"join_code"`
+}
+
+type JoinSessionResponse struct{}
+
 func healthHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -92,4 +98,7 @@ func createSessionHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func JoinSessionHandler(w http.ResponseWriter, r *http.Request) {
 }
