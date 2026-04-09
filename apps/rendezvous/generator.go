@@ -1,4 +1,3 @@
-// Package rendezvous contains API implementation for Apep's rendezvous server
 package rendezvous
 
 import (
@@ -10,7 +9,7 @@ import (
 	"strings"
 )
 
-func newSessionID() (string, error) {
+func NewSessionID() (string, error) {
 	b := make([]byte, 16)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
@@ -18,7 +17,7 @@ func newSessionID() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
-func newToken(n int) (string, error) {
+func NewToken(n int) (string, error) {
 	b := make([]byte, n)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
@@ -26,7 +25,7 @@ func newToken(n int) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(b), nil
 }
 
-func newJoinCode() (string, error) {
+func NewJoinCode() (string, error) {
 	if len(wordList) == 0 {
 		return "", fmt.Errorf("word list is empty")
 	}

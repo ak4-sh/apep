@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func decodeAndValidateX25519PublicKey(s string) ([]byte, error) {
+func ValidatePublicKey(s string) ([]byte, error) {
 	if s == "" {
 		return nil, fmt.Errorf("public key is required")
 	}

@@ -2,32 +2,10 @@ package rendezvous
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
-
-type HealthResponse struct {
-	Status string `json:"status"`
-}
-
-type CreateSessionRequest struct {
-	ProtocolVersion int    `json:"protocol_version"`
-	PublicKey       string `json:"public_key"`
-	ClientName      string `json:"client_name,omitempty"`
-}
-
-type CreateSessionResponse struct {
-	SessionID string `json:"session_id"`
-	JoinCode  string `json:"join_code"`
-	HostToken string `json:"host_token"`
-	Status    string `json:"status"`
-}
-
-type JoinSessionRequest struct {
-	JoinCode string `json:"join_code"`
-}
-
-type JoinSessionResponse struct{}
 
 func healthHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -58,42 +36,22 @@ func createSessionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	publicKeyBytes, err := decodeAndValidateX25519PublicKey(req.PublicKey)
+	session, _, err := CreateSession(req.PublicKey, req.ClientName)
 	if err != nil {
-		log.Printf("public key not matching expected shape: %v", err)
-		http.Error(w, "invalid public key encoding", http.StatusBadRequest)
-		return
-	}
-
-	_ = publicKeyBytes
-	_ = req.ClientName
-
-	sessionID, err := newSessionID()
-	if err != nil {
-		log.Printf("failed to generate session id %v", err)
-		http.Error(w, "internal error", http.StatusInternalServerError)
-		return
-	}
-
-	hostToken, err := newToken(32)
-	if err != nil {
-		log.Printf("failed to generate host token %v", err)
-		http.Error(w, "internal error", http.StatusInternalServerError)
-		return
-	}
-
-	joinCode, err := newJoinCode()
-	if err != nil {
-		log.Printf("failed to generate join code %v", err)
+		if errors.Is(err, ErrInvalidPublicKey) {
+			http.Error(w, "invalid public key encoding", http.StatusBadRequest)
+			return
+		}
+		log.Printf("failed to create session: %v", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 
 	resp := CreateSessionResponse{
-		SessionID: sessionID,
-		JoinCode:  joinCode,
-		HostToken: hostToken,
-		Status:    "waiting",
+		SessionID: session.SessionID,
+		JoinCode:  session.JoinCode,
+		HostToken: session.HostToken,
+		Status:    session.Status,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
